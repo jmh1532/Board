@@ -20,6 +20,7 @@ import service.CommandProcess;
 public class Controller extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private Map<String, Object> commandMap = new HashMap<String, Object>();
+	
 	public void init(ServletConfig config) throws ServletException { 
 	   	//web.xml에서 propertyConfig에 해당하는 init-param 의 값을 읽어옴
 	   	String props = config.getInitParameter("config");
@@ -51,14 +52,17 @@ public class Controller extends HttpServlet {
 	          }
 	     }
 	}
+	
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
 	        requestPro(request, response);
 	}
+	
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
 	    throws ServletException, IOException {
 	       requestPro(request, response);
 	}
+    
 	//시용자의 요청을 분석해서 해당 작업을 처리
 	private void requestPro(HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException {

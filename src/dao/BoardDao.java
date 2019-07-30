@@ -55,6 +55,7 @@ public class BoardDao {
 		return tot;
 	}
 	
+	
 	public List<Board> list(int startRow, int endRow) throws SQLException{
 		Connection conn = null;
 		List<Board> list = new ArrayList<Board>();
@@ -98,6 +99,64 @@ public class BoardDao {
 		}
 		return list;
 	
+	}
+	
+	public Board select(int num) throws SQLException{
+		Connection conn = null;
+		Board bo = new Board();
+		ResultSet rs = null;
+		PreparedStatement stmt = null;
+		
+		String sql = "select * from board where num=?";
+		try {
+			conn = getConnection();
+			stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, num);
+			rs = stmt.executeQuery();
+			if(rs.next()) {
+				bo.setNum(rs.getInt("num"));
+				bo.setWriter(rs.getString("writer"));
+				bo.setSubject(rs.getString("subject"));
+				bo.setEmail(rs.getString("email"));
+				bo.setReadcount(rs.getInt("readcount"));
+				bo.setIp(rs.getString("ip"));
+				bo.setRef(rs.getInt("ref"));
+				bo.setRe_level(rs.getInt("re_level"));
+				bo.setRe_step(rs.getInt("re_step"));
+				bo.setReg_date(rs.getDate("reg_date"));
+				bo.setContent(rs.getString("content"));
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println(e.getMessage());
+		}finally {
+			if(rs != null) rs.close();
+			if(stmt != null)stmt.close();
+			if(conn != null)conn.close();
+		}
+		return bo;
+	
+	}
+	
+	public void addReadCount(int num) throws SQLException {
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		
+		String sql = "update board set readcount = readcount+1 where num=?";
+		try {
+			conn = getConnection();
+			stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, num);
+			stmt.executeUpdate();
+
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println(e.getMessage());
+		}finally {
+			if(stmt != null)stmt.close();
+			if(conn != null)conn.close();
+			
+		}
 	}
 		
 	

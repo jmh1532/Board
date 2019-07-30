@@ -10,12 +10,12 @@ import dao.BoardDao;
 
 
 public class ListAction implements CommandProcess {
-	public String requestPro(HttpServletRequest request,
-		HttpServletResponse response) throws ServletException, IOException {
+	public String requestPro(HttpServletRequest req,
+		HttpServletResponse resp) throws ServletException, IOException {
 		BoardDao bd = BoardDao.getInstance();
 		try { 
 				int totCnt  = bd.getTotalCnt();			
-				String pageNum = request.getParameter("pageNum");	
+				String pageNum = req.getParameter("pageNum");	
 				if (pageNum==null || pageNum.equals("")) {	pageNum = "1";	}
 				int currentPage = Integer.parseInt(pageNum);	
 				int pageSize  = 10, blockSize = 10;
@@ -28,15 +28,15 @@ public class ListAction implements CommandProcess {
 				int endPage = startPage + blockSize -1;	
 				if (endPage > pageCnt) endPage = pageCnt;	
 			
-				request.setAttribute("totCnt", totCnt);
-				request.setAttribute("pageNum", pageNum);
-				request.setAttribute("currentPage", currentPage);
-				request.setAttribute("startNum", startNum);
-				request.setAttribute("list", list);
-				request.setAttribute("blockSize", blockSize);
-				request.setAttribute("pageCnt", pageCnt);
-				request.setAttribute("startPage", startPage);
-				request.setAttribute("endPage", endPage);
+				req.setAttribute("totCnt", totCnt);
+				req.setAttribute("pageNum", pageNum);
+				req.setAttribute("currentPage", currentPage);
+				req.setAttribute("startNum", startNum);
+				req.setAttribute("list", list);
+				req.setAttribute("blockSize", blockSize);
+				req.setAttribute("pageCnt", pageCnt);
+				req.setAttribute("startPage", startPage);
+				req.setAttribute("endPage", endPage);
 				 
 				System.out.println("-----------------------------------------------");  // /ch16/list.do
 				System.out.println("startNum-->" + startNum);  // /ch16/list.do
