@@ -1,7 +1,6 @@
 package service;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -10,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import dao.Board;
 import dao.BoardDao;
 
-public class ContentAction implements CommandProcess{
+public class UpdateFormAction implements CommandProcess {
 
 	@Override
 	public String requestPro(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -19,22 +18,19 @@ public class ContentAction implements CommandProcess{
 		Board board = new Board();
 		
 		try {
-			int num = Integer.parseInt(req.getParameter("num").toString());
+			int num = Integer.parseInt(req.getParameter("num"));
 			String pageNum = req.getParameter("pageNum");	
 			
-			bd.addReadCount(num);
 			board = bd.select(num);
-
+			
 			req.setAttribute("board", board);
 			req.setAttribute("pageNum", pageNum);
-			req.setAttribute("num", num);
 			
 		} catch (Exception e) {
 			// TODO: handle exception
 			System.out.println(e.getMessage());
 		}
-		return "content.jsp";
+		return "updateFrom.jsp";
 	}
 
-	
 }

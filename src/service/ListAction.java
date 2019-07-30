@@ -48,7 +48,7 @@ public class ListAction implements CommandProcess {
 				System.out.println("startPage-->" + startPage);  // /ch16/list.do
 				System.out.println("endPage-->" + endPage);  // /ch16/list.do
 			
-		} catch(Exception e) { System.out.println(e.getMessage()); }
+		} catch(Exception e) { System.out.println("errore=> "+e.getMessage()); }
 		return "list.jsp";
 	}
 }
