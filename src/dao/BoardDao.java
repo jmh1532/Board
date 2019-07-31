@@ -1,15 +1,21 @@
 package dao;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
-
+/*private static class Singletone{
+	public static final
+}*/
 public class BoardDao {
-	//private static BoardDao instance;
+	private static BoardDao instance;
 	private BoardDao() {}
 	
 	public static BoardDao getInstance() { return LazyHolder.INSTANCE; }
@@ -30,167 +36,145 @@ public class BoardDao {
 	}
 	
 	public int getTotalCnt() throws SQLException {
-		Connection conn = null;
-		int tot = 0;
-		ResultSet rs = null;
-		Statement stmt = null;
-		
+		Connection conn = null;	Statement stmt= null; 
+		ResultSet rs = null;    int tot = 0;
 		String sql = "select count(*) from board";
 		try {
 			conn = getConnection();
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery(sql);
-			if(rs.next())tot = rs.getInt(1);
-			
-			System.out.println(rs);
-		} catch (Exception e) {
-			// TODO: handle exception
-			System.out.println(e.getMessage());
-		}finally {
-			if(rs != null) rs.close();
-			if(stmt != null)stmt.close();
-			if(conn != null)conn.close();
-			
+			if (rs.next()) tot = rs.getInt(1);
+		} catch(Exception e) {	System.out.println(e.getMessage()); 
+		} finally {
+			if (rs !=null) rs.close();
+			if (stmt != null) stmt.close();
+			if (conn !=null) conn.close();
 		}
 		return tot;
 	}
-	
-	
-	public List<Board> list(int startRow, int endRow) throws SQLException{
-		Connection conn = null;
+
+	public List<Board> list(int startRow, int endRow) throws SQLException {
 		List<Board> list = new ArrayList<Board>();
+		Connection conn = null;	PreparedStatement pstmt= null;
 		ResultSet rs = null;
-		PreparedStatement stmt = null;
-		
-		String sql = "select * from (select rownum rn, a.* from (select * from board order by ref desc, re_step) a )"
-				+ "where rn between ? and ?";
+		String sql = "select * from (select rownum rn ,a.* from " + 
+		                         	" (select * from board order by ref desc,re_step) a ) "+
+			         " where rn between ? and ?";
 		try {
 			conn = getConnection();
-			stmt = conn.prepareStatement(sql);
-			stmt.setInt(1, startRow);
-			stmt.setInt(2, endRow);
-			rs = stmt.executeQuery();
-			while(rs.next()) {
-			
-				Board bo = new Board();
-				bo.setNum(rs.getInt("num"));
-				bo.setWriter(rs.getString("writer"));
-				bo.setSubject(rs.getString("subject"));
-				bo.setEmail(rs.getString("email"));
-				bo.setReadcount(rs.getInt("readcount"));
-				bo.setIp(rs.getString("ip"));
-				bo.setRef(rs.getInt("ref"));
-				bo.setRe_level(rs.getInt("re_level"));
-				bo.setRe_step(rs.getInt("re_step"));
-				bo.setReg_date(rs.getDate("reg_date"));
-				
-				list.add(bo);
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, startRow);
+			pstmt.setInt(2, endRow);
+			rs = pstmt.executeQuery();
+			while (rs.next()) {
+				Board board = new Board();
+				board.setNum(rs.getInt("num"));
+				board.setWriter(rs.getString("writer"));
+				board.setSubject(rs.getString("subject"));
+				board.setEmail(rs.getString("email"));
+				board.setReadcount(rs.getInt("readcount"));
+				board.setIp(rs.getString("ip"));
+				board.setRef(rs.getInt("ref"));
+				board.setPassword(rs.getString("passwd"));
+			//	board.setRe_level(rs.getInt("re_step"));
+				board.setRe_level(rs.getInt("re_level"));
+				board.setRe_step(rs.getInt("re_step"));
+				board.setReg_date(rs.getDate("reg_date"));
+				board.setContent(rs.getString("content"));
+				list.add(board);
 			}
-			
-			
-		} catch (Exception e) {
-			// TODO: handle exception
-			System.out.println(e.getMessage());
-		}finally {
-			if(rs != null) rs.close();
-			if(stmt != null)stmt.close();
-			if(conn != null)conn.close();
-			
+		} catch(Exception e) {	System.out.println(e.getMessage()); 
+		} finally {
+			if (rs !=null) rs.close();
+			if (pstmt != null) pstmt.close();
+			if (conn !=null) conn.close();
 		}
 		return list;
+	}
 	
+	public void readCount(int num) throws SQLException {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		String sql = "update board set readcount = readcount + 1 where num = ?";
+		try {
+			conn = getConnection();
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, num);
+			pstmt.executeUpdate();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
+		}finally {
+			if (pstmt != null) pstmt.close();
+			if (conn !=null) conn.close();
+		}
 	}
 	
 	public Board select(int num) throws SQLException{
 		Connection conn = null;
-		Board bo = new Board();
+		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		PreparedStatement stmt = null;
-		
-		String sql = "select * from board where num=?";
+		Board board = new Board();
+		String sql = "select * from board where num = ?";
 		try {
 			conn = getConnection();
-			stmt = conn.prepareStatement(sql);
-			stmt.setInt(1, num);
-			rs = stmt.executeQuery();
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, num);
+			rs = pstmt.executeQuery();
 			if(rs.next()) {
-				bo.setNum(rs.getInt("num"));
-				bo.setWriter(rs.getString("writer"));
-				bo.setSubject(rs.getString("subject"));
-				bo.setEmail(rs.getString("email"));
-				bo.setReadcount(rs.getInt("readcount"));
-				bo.setIp(rs.getString("ip"));
-				bo.setRef(rs.getInt("ref"));
-				bo.setContent(rs.getString("content"));
-				bo.setPassword(rs.getString("passwd"));
-				bo.setRe_level(rs.getInt("re_level"));
-				bo.setRe_step(rs.getInt("re_step"));
-				bo.setReg_date(rs.getDate("reg_date"));
+				board.setNum(rs.getInt("num"));
+				board.setWriter(rs.getString("writer"));
+				board.setSubject(rs.getString("subject"));
+				board.setContent(rs.getString("content"));
+				board.setEmail(rs.getString("email"));
+				board.setReadcount(rs.getInt("readcount"));
+				board.setIp(rs.getString("ip"));
+				board.setReg_date(rs.getDate("reg_date"));
+				board.setRef(rs.getInt("ref"));
+				board.setPassword(rs.getString("passwd"));
+			//	board.setRe_level(rs.getInt("re_step"));
+				board.setRe_level(rs.getInt("re_level"));
+				board.setRe_step(rs.getInt("re_step"));
+				
+				//board.setContent(rs.getString("content"));
 				
 			}
 		} catch (Exception e) {
-			// TODO: handle exception
+			// TODO Auto-generated catch block
 			System.out.println(e.getMessage());
 		}finally {
-			if(rs != null) rs.close();
-			if(stmt != null)stmt.close();
-			if(conn != null)conn.close();
+			if (rs != null) rs.close();
+			if (pstmt != null) pstmt.close();
+			if (conn !=null) conn.close();
 		}
-		return bo;
-	
+		return board;
 	}
 	
-	public void addReadCount(int num) throws SQLException {
-		Connection conn = null;
-		PreparedStatement stmt = null;
-		
-		String sql = "update board set readcount = readcount+1 where num=?";
-		try {
-			conn = getConnection();
-			stmt = conn.prepareStatement(sql);
-			stmt.setInt(1, num);
-			stmt.executeUpdate();
-
-		} catch (Exception e) {
-			// TODO: handle exception
-			System.out.println(e.getMessage());
-		}finally {
-			if(stmt != null)stmt.close();
-			if(conn != null)conn.close();
-			
-		}
-	}
-		
-	
-	public int update(Board bo) throws SQLException {
-		Connection conn = null;
-		PreparedStatement stmt = null;
+	public int update(Board board) throws SQLException{
 		int result = 0;
-		String sql = "update board set email=?,passwd=?,subject=?,writer=?,content=?,ip=? where num=?";
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		String sql = "update board set subject = ?, writer = ?, email = ?, passwd = ?, content = ?, ip = ? where num = ?";
 		try {
 			conn = getConnection();
-			stmt = conn.prepareStatement(sql);
-			stmt.setString(1, bo.getEmail());
-			stmt.setString(2, bo.getPassword());
-			stmt.setString(3, bo.getSubject());
-			stmt.setString(4, bo.getWriter());
-			stmt.setString(5, bo.getContent());
-			stmt.setString(6, bo.getIp());
-			stmt.setInt(7, bo.getNum());
-			
-			result = stmt.executeUpdate();
-
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, board.getSubject());
+			pstmt.setString(2, board.getWriter());
+			pstmt.setString(3, board.getEmail());
+			pstmt.setString(4, board.getPassword());
+			pstmt.setString(5, board.getContent());
+			pstmt.setString(6, board.getIp());
+			pstmt.setInt(7, board.getNum());
+			result = pstmt.executeUpdate();
 		} catch (Exception e) {
-			// TODO: handle exception
+			// TODO Auto-generated catch block
 			System.out.println(e.getMessage());
 		}finally {
-			if(stmt != null)stmt.close();
-			if(conn != null)conn.close();
-			
+			if(pstmt != null) pstmt.close();
+			if(conn != null) conn.close();
 		}
 		return result;
 	}
-	
 
 	public int insert(Board board) throws SQLException{
 		int num = board.getNum();
@@ -199,9 +183,20 @@ public class BoardDao {
 		ResultSet rs = null;
 		String sql1 = "select nvl(max(num),0) from board";
 		String sql = "insert into board values(?,?,?,?,?,?,?,?,?,?,?,sysdate)";
+		String sql2 = "update board set re_step = re_step+1 where "
+				+ "ref=? and re_step > ?";
 		int result = 0;
 		try {
 			conn = getConnection();
+			if(num != 0) {
+				pstmt = conn.prepareStatement(sql2);
+				pstmt.setInt(1, board.getRef());
+				pstmt.setInt(2, board.getRe_step());
+				pstmt.executeUpdate();
+				pstmt.close();
+				board.setRe_step(board.getRe_step()+1);
+				board.setRe_level(board.getRe_level()+1);
+			}
 			pstmt = conn.prepareStatement(sql1);
 			rs = pstmt.executeQuery();
 			rs.next();
@@ -234,4 +229,36 @@ public class BoardDao {
 		return result;
 	}
 
+	public int delete(int num, String password) throws SQLException{
+		int result = 0;
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql = "delete from board where num = ?";
+		String sql2 = "select passwd from board where num = ?";
+		String dbPassword = null;
+		try {
+			conn = getConnection();
+			pstmt = conn.prepareStatement(sql2);
+			pstmt.setInt(1, num);
+			rs = pstmt.executeQuery();
+			if(rs.next()) {
+				dbPassword = rs.getString(1);
+				if(dbPassword.equals(password)) {
+					rs.close(); pstmt.close();
+					pstmt = conn.prepareStatement(sql);
+					pstmt.setInt(1, num);
+					result = pstmt.executeUpdate();
+				}else result = 0;
+			}else result = -1;
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}finally {
+			if(rs != null) rs.close();
+			if(pstmt != null) pstmt.close();
+			if(conn != null) conn.close();
+		}
+		
+		return result;
+	}
 }

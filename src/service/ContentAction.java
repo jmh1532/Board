@@ -22,7 +22,7 @@ public class ContentAction implements CommandProcess{
 			int num = Integer.parseInt(req.getParameter("num").toString());
 			String pageNum = req.getParameter("pageNum");	
 			
-			bd.addReadCount(num);
+			bd.readCount(num);
 			board = bd.select(num);
 
 			req.setAttribute("board", board);
